@@ -1,0 +1,4 @@
+user_app.cpp:22:6:void outputs::Trigger_outputs(uint16_t, uint32_t*)	24	static
+user_app.cpp:69:6:void outputs::Read_Bemf(uint32_t*)	16	static
+user_app.cpp:83:6:void outputs::SetPhase(Motor_Active_Phase)	16	static
+user_app.cpp:199:6:bool outputs::Check_zero_corssing_point()	16	static
