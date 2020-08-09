@@ -35,15 +35,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
  15 .debug_ranges 00000b10  00000000  00000000  0002eb00  2**3
                   CONTENTS, READONLY, DEBUGGING
- 16 .debug_macro  00025274  00000000  00000000  0002f610  2**0
+ 16 .debug_macro  0002537e  00000000  00000000  0002f610  2**0
                   CONTENTS, READONLY, DEBUGGING
- 17 .debug_line   0000990c  00000000  00000000  00054884  2**0
+ 17 .debug_line   0000990c  00000000  00000000  0005498e  2**0
                   CONTENTS, READONLY, DEBUGGING
- 18 .debug_str    000d86d4  00000000  00000000  0005e190  2**0
+ 18 .debug_str    000d8c05  00000000  00000000  0005e29a  2**0
                   CONTENTS, READONLY, DEBUGGING
- 19 .comment      0000007b  00000000  00000000  00136864  2**0
+ 19 .comment      0000007b  00000000  00000000  00136e9f  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00003180  00000000  00000000  001368e0  2**2
+ 20 .debug_frame  00003180  00000000  00000000  00136f1c  2**2
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -443,7 +443,7 @@ void SystemClock_Config(void)
  800055c:	60da      	str	r2, [r3, #12]
  800055e:	611a      	str	r2, [r3, #16]
 
-  /** Configure the main internal regulator output voltage 
+  /** Configure the main internal regulator output voltage
   */
   __HAL_RCC_PWR_CLK_ENABLE();
  8000560:	2300      	movs	r3, #0
@@ -471,7 +471,8 @@ void SystemClock_Config(void)
  8000590:	f403 4340 	and.w	r3, r3, #49152	; 0xc000
  8000594:	607b      	str	r3, [r7, #4]
  8000596:	687b      	ldr	r3, [r7, #4]
-  /** Initializes the CPU, AHB and APB busses clocks 
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
  8000598:	2302      	movs	r3, #2
@@ -516,7 +517,7 @@ void SystemClock_Config(void)
     Error_Handler();
  80005d6:	f000 fc4f 	bl	8000e78 <Error_Handler>
   }
-  /** Activate the Over-Drive mode 
+  /** Activate the Over-Drive mode
   */
   if (HAL_PWREx_EnableOverDrive() != HAL_OK)
  80005da:	f002 fc63 	bl	8002ea4 <HAL_PWREx_EnableOverDrive>
@@ -532,7 +533,7 @@ void SystemClock_Config(void)
     Error_Handler();
  80005ee:	f000 fc43 	bl	8000e78 <Error_Handler>
   }
-  /** Initializes the CPU, AHB and APB busses clocks 
+  /** Initializes the CPU, AHB and APB buses clocks
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
  80005f2:	230f      	movs	r3, #15
@@ -602,7 +603,7 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 1 */
 
   /* USER CODE END ADC1_Init 1 */
-  /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion) 
+  /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
   */
   hadc1.Instance = ADC1;
  800064e:	4b26      	ldr	r3, [pc, #152]	; (80006e8 <_ZL12MX_ADC1_Initv+0xac>)
@@ -667,7 +668,7 @@ static void MX_ADC1_Init(void)
     Error_Handler();
  80006b2:	f000 fbe1 	bl	8000e78 <Error_Handler>
   }
-  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
   */
   sConfig.Channel = ADC_CHANNEL_5;
  80006b6:	2305      	movs	r3, #5
@@ -733,7 +734,7 @@ static void MX_ADC3_Init(void)
   /* USER CODE BEGIN ADC3_Init 1 */
 
   /* USER CODE END ADC3_Init 1 */
-  /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion) 
+  /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
   */
   hadc3.Instance = ADC3;
  8000706:	4b39      	ldr	r3, [pc, #228]	; (80007ec <_ZL12MX_ADC3_Initv+0xf8>)
@@ -798,7 +799,7 @@ static void MX_ADC3_Init(void)
     Error_Handler();
  800076a:	f000 fb85 	bl	8000e78 <Error_Handler>
   }
-  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
   */
   sConfig.Channel = ADC_CHANNEL_9;
  800076e:	2309      	movs	r3, #9
@@ -826,7 +827,7 @@ static void MX_ADC3_Init(void)
     Error_Handler();
  8000794:	f000 fb70 	bl	8000e78 <Error_Handler>
   }
-  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
   */
   sConfig.Channel = ADC_CHANNEL_14;
  8000798:	230e      	movs	r3, #14
@@ -851,7 +852,7 @@ static void MX_ADC3_Init(void)
     Error_Handler();
  80007ba:	f000 fb5d 	bl	8000e78 <Error_Handler>
   }
-  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
   */
   sConfig.Channel = ADC_CHANNEL_15;
  80007be:	230f      	movs	r3, #15
@@ -1015,10 +1016,10 @@ static void MX_TIM2_Init(void)
 
 080008ac <_ZL11MX_DMA_Initv>:
 
-/** 
+/**
   * Enable DMA controller clock
   */
-static void MX_DMA_Init(void) 
+static void MX_DMA_Init(void)
 {
  80008ac:	b580      	push	{r7, lr}
  80008ae:	b082      	sub	sp, #8
@@ -1193,7 +1194,7 @@ static void MX_GPIO_Init(void)
  80009f0:	687b      	ldr	r3, [r7, #4]
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOE, Q1_Pin|Q2_Pin|Q3_Pin|Q4_Pin 
+  HAL_GPIO_WritePin(GPIOE, Q1_Pin|Q2_Pin|Q3_Pin|Q4_Pin
  80009f2:	2200      	movs	r2, #0
  80009f4:	217c      	movs	r1, #124	; 0x7c
  80009f6:	487a      	ldr	r0, [pc, #488]	; (8000be0 <_ZL12MX_GPIO_Initv+0x2e4>)
@@ -1228,9 +1229,9 @@ static void MX_GPIO_Init(void)
  8000a24:	4872      	ldr	r0, [pc, #456]	; (8000bf0 <_ZL12MX_GPIO_Initv+0x2f4>)
  8000a26:	f002 fa23 	bl	8002e70 <HAL_GPIO_WritePin>
 
-  /*Configure GPIO pins : Q1_Pin Q2_Pin Q3_Pin Q4_Pin 
+  /*Configure GPIO pins : Q1_Pin Q2_Pin Q3_Pin Q4_Pin
                            Q5_Pin */
-  GPIO_InitStruct.Pin = Q1_Pin|Q2_Pin|Q3_Pin|Q4_Pin 
+  GPIO_InitStruct.Pin = Q1_Pin|Q2_Pin|Q3_Pin|Q4_Pin
  8000a2a:	237c      	movs	r3, #124	; 0x7c
  8000a2c:	627b      	str	r3, [r7, #36]	; 0x24
                           |Q5_Pin;
@@ -1240,8 +1241,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
  8000a32:	2300      	movs	r3, #0
  8000a34:	62fb      	str	r3, [r7, #44]	; 0x2c
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
- 8000a36:	2300      	movs	r3, #0
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+ 8000a36:	2303      	movs	r3, #3
  8000a38:	633b      	str	r3, [r7, #48]	; 0x30
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
  8000a3a:	f107 0324 	add.w	r3, r7, #36	; 0x24
@@ -1268,9 +1269,9 @@ static void MX_GPIO_Init(void)
  8000a5e:	4861      	ldr	r0, [pc, #388]	; (8000be4 <_ZL12MX_GPIO_Initv+0x2e8>)
  8000a60:	f002 f85c 	bl	8002b1c <HAL_GPIO_Init>
 
-  /*Configure GPIO pins : A0_Pin A1_Pin A2_Pin SDNRAS_Pin 
+  /*Configure GPIO pins : A0_Pin A1_Pin A2_Pin SDNRAS_Pin
                            A6_Pin A7_Pin A8_Pin A9_Pin */
-  GPIO_InitStruct.Pin = A0_Pin|A1_Pin|A2_Pin|SDNRAS_Pin 
+  GPIO_InitStruct.Pin = A0_Pin|A1_Pin|A2_Pin|SDNRAS_Pin
  8000a64:	f64f 0307 	movw	r3, #63495	; 0xf807
  8000a68:	627b      	str	r3, [r7, #36]	; 0x24
                           |A6_Pin|A7_Pin|A8_Pin|A9_Pin;
@@ -1374,9 +1375,9 @@ static void MX_GPIO_Init(void)
  8000afe:	483a      	ldr	r0, [pc, #232]	; (8000be8 <_ZL12MX_GPIO_Initv+0x2ec>)
  8000b00:	f002 f80c 	bl	8002b1c <HAL_GPIO_Init>
 
-  /*Configure GPIO pins : B5_Pin VSYNC_Pin G2_Pin R4_Pin 
+  /*Configure GPIO pins : B5_Pin VSYNC_Pin G2_Pin R4_Pin
                            R5_Pin */
-  GPIO_InitStruct.Pin = B5_Pin|VSYNC_Pin|G2_Pin|R4_Pin 
+  GPIO_InitStruct.Pin = B5_Pin|VSYNC_Pin|G2_Pin|R4_Pin
  8000b04:	f641 0358 	movw	r3, #6232	; 0x1858
  8000b08:	627b      	str	r3, [r7, #36]	; 0x24
                           |R5_Pin;
@@ -1471,9 +1472,9 @@ static void MX_GPIO_Init(void)
  8000b8c:	481b      	ldr	r0, [pc, #108]	; (8000bfc <_ZL12MX_GPIO_Initv+0x300>)
  8000b8e:	f001 ffc5 	bl	8002b1c <HAL_GPIO_Init>
 
-  /*Configure GPIO pins : A10_Pin A11_Pin BA0_Pin BA1_Pin 
+  /*Configure GPIO pins : A10_Pin A11_Pin BA0_Pin BA1_Pin
                            SDCLK_Pin SDNCAS_Pin */
-  GPIO_InitStruct.Pin = A10_Pin|A11_Pin|BA0_Pin|BA1_Pin 
+  GPIO_InitStruct.Pin = A10_Pin|A11_Pin|BA0_Pin|BA1_Pin
  8000b92:	f248 1333 	movw	r3, #33075	; 0x8133
  8000b96:	627b      	str	r3, [r7, #36]	; 0x24
                           |SDCLK_Pin|SDNCAS_Pin;
@@ -1495,13 +1496,13 @@ static void MX_GPIO_Init(void)
  8000bae:	4810      	ldr	r0, [pc, #64]	; (8000bf0 <_ZL12MX_GPIO_Initv+0x2f4>)
  8000bb0:	f001 ffb4 	bl	8002b1c <HAL_GPIO_Init>
 
-  /*Configure GPIO pins : D4_Pin D5_Pin D6_Pin D7_Pin 
-                           D8_Pin D9_Pin D10_Pin D11_Pin 
+  /*Configure GPIO pins : D4_Pin D5_Pin D6_Pin D7_Pin
+                           D8_Pin D9_Pin D10_Pin D11_Pin
                            D12_Pin NBL0_Pin NBL1_Pin */
-  GPIO_InitStruct.Pin = D4_Pin|D5_Pin|D6_Pin|D7_Pin 
+  GPIO_InitStruct.Pin = D4_Pin|D5_Pin|D6_Pin|D7_Pin
  8000bb4:	f64f 7383 	movw	r3, #65411	; 0xff83
  8000bb8:	627b      	str	r3, [r7, #36]	; 0x24
-                          |D8_Pin|D9_Pin|D10_Pin|D11_Pin 
+                          |D8_Pin|D9_Pin|D10_Pin|D11_Pin
                           |D12_Pin|NBL0_Pin|NBL1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
  8000bba:	2302      	movs	r3, #2
@@ -1591,9 +1592,9 @@ static void MX_GPIO_Init(void)
  8000c54:	4864      	ldr	r0, [pc, #400]	; (8000de8 <_ZL12MX_GPIO_Initv+0x4ec>)
  8000c56:	f001 ff61 	bl	8002b1c <HAL_GPIO_Init>
 
-  /*Configure GPIO pins : D13_Pin D14_Pin D15_Pin D0_Pin 
+  /*Configure GPIO pins : D13_Pin D14_Pin D15_Pin D0_Pin
                            D1_Pin D2_Pin D3_Pin */
-  GPIO_InitStruct.Pin = D13_Pin|D14_Pin|D15_Pin|D0_Pin 
+  GPIO_InitStruct.Pin = D13_Pin|D14_Pin|D15_Pin|D0_Pin
  8000c5a:	f24c 7303 	movw	r3, #50947	; 0xc703
  8000c5e:	627b      	str	r3, [r7, #36]	; 0x24
                           |D1_Pin|D2_Pin|D3_Pin;
@@ -2048,7 +2049,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
  8000f0e:	f403 7380 	and.w	r3, r3, #256	; 0x100
  8000f12:	61bb      	str	r3, [r7, #24]
  8000f14:	69bb      	ldr	r3, [r7, #24]
-  
+
     __HAL_RCC_GPIOA_CLK_ENABLE();
  8000f16:	2300      	movs	r3, #0
  8000f18:	617b      	str	r3, [r7, #20]
@@ -2062,8 +2063,8 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
  8000f2a:	f003 0301 	and.w	r3, r3, #1
  8000f2e:	617b      	str	r3, [r7, #20]
  8000f30:	697b      	ldr	r3, [r7, #20]
-    /**ADC1 GPIO Configuration    
-    PA5     ------> ADC1_IN5 
+    /**ADC1 GPIO Configuration
+    PA5     ------> ADC1_IN5
     */
     GPIO_InitStruct.Pin = GPIO_PIN_5;
  8000f32:	2320      	movs	r3, #32
