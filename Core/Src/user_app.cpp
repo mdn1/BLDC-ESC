@@ -6,8 +6,9 @@
  */
 #include "user_app.hpp"
 
-uint16_t motor_control_phase_delay = 1000;
+uint16_t motor_control_phase_delay = 20;
 uint32_t counter=0;
+uint32_t alignment_counter=0;
 uint32_t bemfA=0;
 uint32_t bemfB=0;
 uint32_t bemfC=0;
@@ -16,55 +17,144 @@ int32_t delta_bemf=0;
 int32_t last_delta_bemf=0;
 uint32_t open_loop_counter = 0;
 
-Motor_Active_Phase phase_to_activate = C_B;
+MOTOR_STATE motor_state = STOP;
+MOTOR_ACTIVE_PHASE active_phase = C_B;
+
+void outputs::Motor_Control_Routine()
+{
+	switch (motor_state)
+	{
+	case STOP:
+		Motor_Alignment();
+		break;
+	case OPEN_LOOP:
+		Open_Loop();
+		break;
+	case CLOSED_LOOP:
+		break;
+	}
+}
+
+//This function is called every 100µs=0,000 1s
+void outputs::Motor_Alignment()
+{
+	if (alignment_counter >= 0 && alignment_counter <=1 )
+	{
+		SetPhase(C_B, 50);
+		alignment_counter ++;
+	}
+	else if(alignment_counter > 1 && alignment_counter < 20000)
+	{
+		alignment_counter++;
+	}
+	else if (alignment_counter == 20000)
+	{
+		SetPhase((MOTOR_ACTIVE_PHASE)(active_phase + 1), 50);
+		alignment_counter ++;
+	}
+	else if (alignment_counter > 20000 && alignment_counter < 30000)
+	{
+		alignment_counter ++;
+	}else
+	{
+		alignment_counter = 0;
+		motor_state = OPEN_LOOP;
+	}
+
+}
 
 //This function is called every 10µs=0,000010s
-void outputs::Trigger_outputs(uint16_t duty, uint32_t all_bemf[])
+void outputs::Trigger_outputs(uint32_t all_bemf[])
 {
-	motor_control_phase_delay = 1*duty;
+	motor_control_phase_delay = 1;
 
 	if (counter >= motor_control_phase_delay)
 	{
 		open_loop_counter ++;
-
+		//Closed_Loop();
 		Read_Bemf(all_bemf);
-		switch (phase_to_activate)
-		{
-			case C_B:
-				outputs::SetPhase(phase_to_activate);
-				delta_bemf = bemfA - sum_bemf;
-				if (outputs::Check_zero_corssing_point()) {phase_to_activate = A_B;}
-				break;
-			case A_B:
-				outputs::SetPhase(phase_to_activate);
-				delta_bemf = bemfC - sum_bemf;
-				if (outputs::Check_zero_corssing_point()) {phase_to_activate = A_C;}
-				break;
-			case A_C:
-				outputs::SetPhase(phase_to_activate);
-				delta_bemf = bemfB - sum_bemf;
-				if (outputs::Check_zero_corssing_point()) {phase_to_activate = B_C;}
-				break;
-			case B_C:
-				outputs::SetPhase(phase_to_activate);
-				delta_bemf = bemfA - sum_bemf;
-				if (outputs::Check_zero_corssing_point()) {phase_to_activate = B_A;}
-				break;
-			case B_A:
-				outputs::SetPhase(phase_to_activate);
-				delta_bemf = bemfC - sum_bemf;
-				if (outputs::Check_zero_corssing_point()) {phase_to_activate = C_A;}
-				break;
-			case C_A:
-				outputs::SetPhase(phase_to_activate);
-				delta_bemf = bemfB - sum_bemf;
-				if (outputs::Check_zero_corssing_point()) {phase_to_activate = C_B;}
-				break;
-		}
 
 		counter=0;
-	}else {counter++;}
+	}
+	else
+	{
+		counter++;
+	}
 }
+
+
+void outputs::Open_Loop()
+{
+	if (counter >= motor_control_phase_delay)
+		{
+		switch (active_phase)
+				{
+					case C_B:
+						outputs::SetPhase(A_B, duty);
+						break;
+					case A_B:
+						outputs::SetPhase(A_C, duty);
+						break;
+					case A_C:
+						outputs::SetPhase(B_C, duty);
+						break;
+					case B_C:
+						outputs::SetPhase(B_A, duty);
+						break;
+					case B_A:
+						outputs::SetPhase(C_A, duty);
+						break;
+					case C_A:
+						outputs::SetPhase(C_B, duty);
+						break;
+				}
+			counter=0;
+		}
+		else
+		{
+			counter++;
+		}
+}
+
+
+/*
+void outputs::Closed_Loop()
+{
+	switch (active_phase)
+	{
+		case C_B:
+			outputs::SetPhase(active_phase);
+			delta_bemf = bemfA - sum_bemf;
+			if (outputs::Check_zero_corssing_point()) {active_phase = A_B;}
+			break;
+		case A_B:
+			outputs::SetPhase(active_phase);
+			delta_bemf = bemfC - sum_bemf;
+			if (outputs::Check_zero_corssing_point()) {active_phase = A_C;}
+			break;
+		case A_C:
+			outputs::SetPhase(active_phase);
+			delta_bemf = bemfB - sum_bemf;
+			if (outputs::Check_zero_corssing_point()) {active_phase = B_C;}
+			break;
+		case B_C:
+			outputs::SetPhase(active_phase);
+			delta_bemf = bemfA - sum_bemf;
+			if (outputs::Check_zero_corssing_point()) {active_phase = B_A;}
+			break;
+		case B_A:
+			outputs::SetPhase(active_phase);
+			delta_bemf = bemfC - sum_bemf;
+			if (outputs::Check_zero_corssing_point()) {active_phase = C_A;}
+			break;
+		case C_A:
+			outputs::SetPhase(active_phase);
+			delta_bemf = bemfB - sum_bemf;
+			if (outputs::Check_zero_corssing_point()) {active_phase = C_B;}
+			break;
+	}
+}
+*/
 
 void outputs::Read_Bemf(uint32_t all_bemf[])
 {
@@ -74,125 +164,69 @@ void outputs::Read_Bemf(uint32_t all_bemf[])
 	sum_bemf= (bemfA + bemfB + bemfC)/3;
 }
 
-
 /*
 HIGH	C	A	A	B	B	C
 LOW		B	B	C	C	A	A
 BEMF	A	C	B	A	C	B
 */
-void outputs::SetPhase(Motor_Active_Phase active_phase1)
+void outputs::SetPhase(MOTOR_ACTIVE_PHASE phase_to_activate, uint32_t pwm_duty)
 {
 	switch (phase_to_activate)
 	{
-	case C_B:
-		HAL_GPIO_WritePin(Q1_GPIO_Port, Q1_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(Q2_GPIO_Port, Q2_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(Q3_GPIO_Port, Q3_Pin, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(Q4_GPIO_Port, Q4_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(Q5_GPIO_Port, Q5_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(Q6_GPIO_Port, Q6_Pin, GPIO_PIN_SET);
-		//phase_to_activate = A_B;
-		break;
-	case A_B:
-		HAL_GPIO_WritePin(Q1_GPIO_Port, Q1_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(Q2_GPIO_Port, Q2_Pin, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(Q3_GPIO_Port, Q3_Pin, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(Q4_GPIO_Port, Q4_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(Q5_GPIO_Port, Q5_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(Q6_GPIO_Port, Q6_Pin, GPIO_PIN_RESET);
-		//phase_to_activate = A_C;
-		break;
-	case A_C:
-		HAL_GPIO_WritePin(Q1_GPIO_Port, Q1_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(Q2_GPIO_Port, Q2_Pin, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(Q3_GPIO_Port, Q3_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(Q4_GPIO_Port, Q4_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(Q5_GPIO_Port, Q5_Pin, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(Q6_GPIO_Port, Q6_Pin, GPIO_PIN_RESET);
-		//phase_to_activate = B_C;
-		break;
-	case B_C:
-		HAL_GPIO_WritePin(Q1_GPIO_Port, Q1_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(Q2_GPIO_Port, Q2_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(Q3_GPIO_Port, Q3_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(Q4_GPIO_Port, Q4_Pin, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(Q5_GPIO_Port, Q5_Pin, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(Q6_GPIO_Port, Q6_Pin, GPIO_PIN_RESET);
-		//phase_to_activate = B_A;
-		break;
-	case B_A:
-		HAL_GPIO_WritePin(Q1_GPIO_Port, Q1_Pin, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(Q2_GPIO_Port, Q2_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(Q3_GPIO_Port, Q3_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(Q4_GPIO_Port, Q4_Pin, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(Q5_GPIO_Port, Q5_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(Q6_GPIO_Port, Q6_Pin, GPIO_PIN_RESET);
-		//phase_to_activate = C_A;
-		break;
-	case C_A:
-		HAL_GPIO_WritePin(Q1_GPIO_Port, Q1_Pin, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(Q2_GPIO_Port, Q2_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(Q3_GPIO_Port, Q3_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(Q4_GPIO_Port, Q4_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(Q5_GPIO_Port, Q5_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(Q6_GPIO_Port, Q6_Pin, GPIO_PIN_SET);
-		//phase_to_activate = C_B;
-		break;
-//	case C_B:
-//		HAL_GPIO_WritePin(Q1_GPIO_Port, Q1_Pin, GPIO_PIN_RESET);
-//		HAL_GPIO_WritePin(Q2_GPIO_Port, Q2_Pin, GPIO_PIN_SET);
-//		HAL_GPIO_WritePin(Q3_GPIO_Port, Q3_Pin, GPIO_PIN_SET);
-//		HAL_GPIO_WritePin(Q4_GPIO_Port, Q4_Pin, GPIO_PIN_SET);
-//		HAL_GPIO_WritePin(Q5_GPIO_Port, Q5_Pin, GPIO_PIN_RESET);
-//		HAL_GPIO_WritePin(Q6_GPIO_Port, Q6_Pin, GPIO_PIN_RESET);
-//		phase_to_activate = A_B;
-//		break;
-//	case A_B:
-//		HAL_GPIO_WritePin(Q1_GPIO_Port, Q1_Pin, GPIO_PIN_RESET);
-//		HAL_GPIO_WritePin(Q2_GPIO_Port, Q2_Pin, GPIO_PIN_RESET);
-//		HAL_GPIO_WritePin(Q3_GPIO_Port, Q3_Pin, GPIO_PIN_SET);
-//		HAL_GPIO_WritePin(Q4_GPIO_Port, Q4_Pin, GPIO_PIN_SET);
-//		HAL_GPIO_WritePin(Q5_GPIO_Port, Q5_Pin, GPIO_PIN_RESET);
-//		HAL_GPIO_WritePin(Q6_GPIO_Port, Q6_Pin, GPIO_PIN_SET);
-//		phase_to_activate = A_C;
-//		break;
-//	case A_C:
-//		HAL_GPIO_WritePin(Q1_GPIO_Port, Q1_Pin, GPIO_PIN_RESET);
-//		HAL_GPIO_WritePin(Q2_GPIO_Port, Q2_Pin, GPIO_PIN_RESET);
-//		HAL_GPIO_WritePin(Q3_GPIO_Port, Q3_Pin, GPIO_PIN_RESET);
-//		HAL_GPIO_WritePin(Q4_GPIO_Port, Q4_Pin, GPIO_PIN_SET);
-//		HAL_GPIO_WritePin(Q5_GPIO_Port, Q5_Pin, GPIO_PIN_SET);
-//		HAL_GPIO_WritePin(Q6_GPIO_Port, Q6_Pin, GPIO_PIN_SET);
-//		phase_to_activate = B_C;
-//		break;
-//	case B_C:
-//		HAL_GPIO_WritePin(Q1_GPIO_Port, Q1_Pin, GPIO_PIN_RESET);
-//		HAL_GPIO_WritePin(Q2_GPIO_Port, Q2_Pin, GPIO_PIN_SET);
-//		HAL_GPIO_WritePin(Q3_GPIO_Port, Q3_Pin, GPIO_PIN_RESET);
-//		HAL_GPIO_WritePin(Q4_GPIO_Port, Q4_Pin, GPIO_PIN_RESET);
-//		HAL_GPIO_WritePin(Q5_GPIO_Port, Q5_Pin, GPIO_PIN_SET);
-//		HAL_GPIO_WritePin(Q6_GPIO_Port, Q6_Pin, GPIO_PIN_SET);
-//		phase_to_activate = B_A;
-//		break;
-//	case B_A:
-//		HAL_GPIO_WritePin(Q1_GPIO_Port, Q1_Pin, GPIO_PIN_SET);
-//		HAL_GPIO_WritePin(Q2_GPIO_Port, Q2_Pin, GPIO_PIN_SET);
-//		HAL_GPIO_WritePin(Q3_GPIO_Port, Q3_Pin, GPIO_PIN_RESET);
-//		HAL_GPIO_WritePin(Q4_GPIO_Port, Q4_Pin, GPIO_PIN_RESET);
-//		HAL_GPIO_WritePin(Q5_GPIO_Port, Q5_Pin, GPIO_PIN_RESET);
-//		HAL_GPIO_WritePin(Q6_GPIO_Port, Q6_Pin, GPIO_PIN_SET);
-//		phase_to_activate = C_A;
-//		break;
-//	case C_A:
-//		HAL_GPIO_WritePin(Q1_GPIO_Port, Q1_Pin, GPIO_PIN_SET);
-//		HAL_GPIO_WritePin(Q2_GPIO_Port, Q2_Pin, GPIO_PIN_SET);
-//		HAL_GPIO_WritePin(Q3_GPIO_Port, Q3_Pin, GPIO_PIN_RESET);
-//		HAL_GPIO_WritePin(Q4_GPIO_Port, Q4_Pin, GPIO_PIN_SET);
-//		HAL_GPIO_WritePin(Q5_GPIO_Port, Q5_Pin, GPIO_PIN_RESET);
-//		HAL_GPIO_WritePin(Q6_GPIO_Port, Q6_Pin, GPIO_PIN_RESET);
-//		phase_to_activate = C_B;
-//		break;
-
+		case C_B:
+			htim3.Instance->CCR1 = 0;
+			htim3.Instance->CCR2 = 0;
+			htim3.Instance->CCR3 = 100;
+			htim3.Instance->CCR4 = 0;
+			htim1.Instance->CCR1 = 0;
+			htim1.Instance->CCR4 = pwm_duty;
+			active_phase = C_B;
+			break;
+		case A_B:
+			htim3.Instance->CCR1 = 0;
+			htim3.Instance->CCR2 = pwm_duty;
+			htim3.Instance->CCR3 = 100;
+			htim3.Instance->CCR4 = 0;
+			htim1.Instance->CCR1 = 0;
+			htim1.Instance->CCR4 = 0;
+			active_phase = A_B;
+			break;
+		case A_C:
+			htim3.Instance->CCR1 = 0;
+			htim3.Instance->CCR2 = pwm_duty;
+			htim3.Instance->CCR3 = 0;
+			htim3.Instance->CCR4 = 0;
+			htim1.Instance->CCR1 = 100;
+			htim1.Instance->CCR4 = 0;
+			active_phase = A_C;
+			break;
+		case B_C:
+			htim3.Instance->CCR1 = 0;
+			htim3.Instance->CCR2 = 0;
+			htim3.Instance->CCR3 = 0;
+			htim3.Instance->CCR4 = pwm_duty;
+			htim1.Instance->CCR1 = 100;
+			htim1.Instance->CCR4 = 0;
+			active_phase = B_C;
+			break;
+		case B_A:
+			htim3.Instance->CCR1 = 100;
+			htim3.Instance->CCR2 = 0;
+			htim3.Instance->CCR3 = 0;
+			htim3.Instance->CCR4 = pwm_duty;
+			htim1.Instance->CCR1 = 0;
+			htim1.Instance->CCR4 = 0;
+			active_phase = B_A;
+			break;
+		case C_A:
+			htim3.Instance->CCR1 = 100;
+			htim3.Instance->CCR2 = 0;
+			htim3.Instance->CCR3 = 0;
+			htim3.Instance->CCR4 = 0;
+			htim1.Instance->CCR1 = 0;
+			htim1.Instance->CCR4 = pwm_duty;
+			active_phase = C_A;
+			break;
 	}
 }
 

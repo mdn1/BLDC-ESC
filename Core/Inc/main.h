@@ -50,6 +50,8 @@ extern "C" {
 
 /* USER CODE END EM */
 
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
@@ -58,18 +60,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define Q1_Pin GPIO_PIN_2
-#define Q1_GPIO_Port GPIOE
-#define Q2_Pin GPIO_PIN_3
-#define Q2_GPIO_Port GPIOE
-#define Q3_Pin GPIO_PIN_4
-#define Q3_GPIO_Port GPIOE
-#define Q4_Pin GPIO_PIN_5
-#define Q4_GPIO_Port GPIOE
-#define Q5_Pin GPIO_PIN_6
-#define Q5_GPIO_Port GPIOE
-#define Q6_Pin GPIO_PIN_13
-#define Q6_GPIO_Port GPIOC
 #define PC14_OSC32_IN_Pin GPIO_PIN_14
 #define PC14_OSC32_IN_GPIO_Port GPIOC
 #define PC15_OSC32_OUT_Pin GPIO_PIN_15
@@ -144,8 +134,6 @@ void Error_Handler(void);
 #define A11_GPIO_Port GPIOG
 #define D4_Pin GPIO_PIN_7
 #define D4_GPIO_Port GPIOE
-#define D5_Pin GPIO_PIN_8
-#define D5_GPIO_Port GPIOE
 #define D6_Pin GPIO_PIN_9
 #define D6_GPIO_Port GPIOE
 #define D7_Pin GPIO_PIN_10
@@ -166,8 +154,6 @@ void Error_Handler(void);
 #define G5_GPIO_Port GPIOB
 #define OTG_HS_ID_Pin GPIO_PIN_12
 #define OTG_HS_ID_GPIO_Port GPIOB
-#define VBUS_HS_Pin GPIO_PIN_13
-#define VBUS_HS_GPIO_Port GPIOB
 #define OTG_HS_DM_Pin GPIO_PIN_14
 #define OTG_HS_DM_GPIO_Port GPIOB
 #define OTG_HS_DP_Pin GPIO_PIN_15
@@ -198,20 +184,22 @@ void Error_Handler(void);
 #define DOTCLK_GPIO_Port GPIOG
 #define SDCLK_Pin GPIO_PIN_8
 #define SDCLK_GPIO_Port GPIOG
-#define HSYNC_Pin GPIO_PIN_6
-#define HSYNC_GPIO_Port GPIOC
-#define G6_Pin GPIO_PIN_7
-#define G6_GPIO_Port GPIOC
-#define I2C3_SDA_Pin GPIO_PIN_9
-#define I2C3_SDA_GPIO_Port GPIOC
-#define I2C3_SCL_Pin GPIO_PIN_8
-#define I2C3_SCL_GPIO_Port GPIOA
+#define Q1_Pin GPIO_PIN_6
+#define Q1_GPIO_Port GPIOC
+#define Q2_Pin GPIO_PIN_7
+#define Q2_GPIO_Port GPIOC
+#define Q3_Pin GPIO_PIN_8
+#define Q3_GPIO_Port GPIOC
+#define Q4_Pin GPIO_PIN_9
+#define Q4_GPIO_Port GPIOC
+#define Q5_Pin GPIO_PIN_8
+#define Q5_GPIO_Port GPIOA
 #define STLINK_RX_Pin GPIO_PIN_9
 #define STLINK_RX_GPIO_Port GPIOA
 #define STLINK_TX_Pin GPIO_PIN_10
 #define STLINK_TX_GPIO_Port GPIOA
-#define R4_Pin GPIO_PIN_11
-#define R4_GPIO_Port GPIOA
+#define Q6_Pin GPIO_PIN_11
+#define Q6_GPIO_Port GPIOA
 #define R5_Pin GPIO_PIN_12
 #define R5_GPIO_Port GPIOA
 #define SWDIO_Pin GPIO_PIN_13
